@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html lang="en-US">
+    <head>
+        <title>hwp-csp-plugin test page</title>
+        <meta http-equiv="Content-Security-Policy" content="default-src 'self'" />
+        <meta http-equiv="content-security-policy" content="" />
+        <meta http-equiv="CONTENT-security-policy" />
+    </head>
+    <body>
+        <script>
+            for (var i=0; i<100; ++i) {
+                console.log(i);
+            }
+        </script>
+
+    </body>
+</html>
