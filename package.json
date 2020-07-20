@@ -1,6 +1,6 @@
 {
   "name": "hwp-csp-plugin",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Content Security Policy plugin for html-webpack-plugin",
   "main": "dist/index.js",
   "scripts": {
