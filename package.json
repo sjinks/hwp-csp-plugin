@@ -42,13 +42,13 @@
     "eslint-config-prettier": "^6.11.0",
     "eslint-plugin-prettier": "^3.1.4",
     "html-webpack-plugin": "^4.3.0",
-    "jest": "^26.1.0",
+    "jest": "^26.2.1",
     "memfs": "^3.2.0",
     "merge": "^1.2.1",
     "prettier": "^2.0.5",
     "ts-jest": "^26.1.4",
     "typescript": "^3.9.7",
-    "webpack": "^4.44.0"
+    "webpack": "^4.44.1"
   },
   "dependencies": {
     "cheerio": "^1.0.0-rc.3",
