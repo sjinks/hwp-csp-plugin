@@ -121,9 +121,9 @@ export class HwpCspPlugin {
         return html;
     }
 
-    private _getHashes(elements: Cheerio, $: CheerioStatic): string[] {
+    private _getHashes(elements: cheerio.Cheerio, $: cheerio.Root): string[] {
         const { addIntegrity, hashFunc } = this._options;
-        return elements.get().map((e: CheerioElement): string => {
+        return elements.get().map((e: cheerio.Element): string => {
             const s = $(e).html() || '';
             const hash = `${hashFunc}-${HwpCspPlugin._cspHash(s, hashFunc)}`;
             if (addIntegrity && !$(e).attr('integrity')) {
