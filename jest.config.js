@@ -9,9 +9,4 @@ module.exports = merge.recursive(ts_preset, {
     collectCoverageFrom: [
         '<rootDir>/src/*.ts',
     ],
-    globals: {
-        'ts-jest': {
-            packageJson: 'package.json',
-        },
-    }
 });
