@@ -104,7 +104,10 @@ export class HwpCspPlugin {
         const newPolicy = HwpCspPlugin._buildPolicy(policy);
         if (newPolicy) {
             $('meta[http-equiv]')
-                .filter((i, el): boolean => el.attribs['http-equiv'].toLowerCase() === 'content-security-policy')
+                .filter(
+                    (i, el): boolean =>
+                        (el as cheerio.TagElement).attribs['http-equiv'].toLowerCase() === 'content-security-policy',
+                )
                 .remove();
 
             const meta = $('<meta http-equiv="Content-Security-Policy"/>');

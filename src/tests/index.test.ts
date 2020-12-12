@@ -90,9 +90,9 @@ describe('HwpCspPlugin', (): void => {
                 };
 
                 metas.each((i, el): void => {
-                    const attr = el.attribs['http-equiv'];
+                    const attr = (el as cheerio.TagElement).attribs['http-equiv'];
                     const expected = map[attr];
-                    expect(el.attribs['content']).toEqual(expected);
+                    expect((el as cheerio.TagElement).attribs['content']).toEqual(expected);
                 });
             },
             done,
