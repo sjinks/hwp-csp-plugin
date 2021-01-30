@@ -61,7 +61,7 @@ export class HwpCspPlugin {
 
     public apply(compiler: webpack.Compiler): void {
         if (this._options.enabled) {
-            compiler.hooks.compilation.tap(PLUGIN, (compilation: webpack.compilation.Compilation): void => {
+            compiler.hooks.compilation.tap(PLUGIN, (compilation): void => {
                 const hooks = HtmlWebpackPlugin.getHooks(compilation);
                 hooks.beforeEmit.tapAsync(PLUGIN, (data, cb): unknown => {
                     data.html = this._processHTML(data.html, data.plugin);
