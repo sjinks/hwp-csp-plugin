@@ -179,7 +179,7 @@ describe('HwpCspPlugin', (): void => {
     });
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    it.each<any>([[true], [false]])('properly handles XHTML mode (%f)', (xhtml, done): void => {
+    it.each<any>([[true], [false]])('properly handles XHTML mode (%s)', (xhtml, done): void => {
         runWebpack(
             getWebpackConfig([
                 getHWP('script-style.html', xhtml),
