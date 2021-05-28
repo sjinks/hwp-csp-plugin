@@ -25,34 +25,15 @@ export function getWebpackConfig(plugins: (WebpackPluginFunction | WebpackPlugin
     };
 }
 
-const writeFile = (arg0: string, arg1: string | Buffer, arg2: (arg0?: NodeJS.ErrnoException) => void): void =>
-    fs.writeFile(arg0, arg1, (error) => arg2(error || undefined));
-
-const mkdir = (arg0: string, arg1: (arg0?: NodeJS.ErrnoException) => void): void =>
-    fs.mkdir(arg0, (error) => arg1(error || undefined));
-
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const stat = (arg0: string, arg1: (arg0?: NodeJS.ErrnoException, arg1?: any) => void): void =>
-    fs.stat(arg0, (error, stats) => arg1(error || undefined, stats));
-
-const readFile = (arg0: string, arg1: (arg0?: NodeJS.ErrnoException, arg1?: string | Buffer) => void): void =>
-    fs.readFile(arg0, (error, buf) => arg1(error || undefined, buf));
-
-const rmdir = (arg0: string, arg1: (arg0?: NodeJS.ErrnoException) => void): void =>
-    fs.mkdir(arg0, (error) => arg1(error || undefined));
-
-const unlink = (arg0: string, arg1: (arg0?: NodeJS.ErrnoException) => void): void =>
-    fs.unlink(arg0, (error) => arg1(error || undefined));
-
 const filesystem = {
     join: path.join,
-    mkdir: mkdir,
+    mkdir: fs.mkdir,
     mkdirp: fs.mkdirp,
-    rmdir: rmdir,
-    unlink: unlink,
-    writeFile: writeFile,
-    stat: stat,
-    readFile: readFile,
+    rmdir: fs.rmdir,
+    unlink: fs.unlink,
+    writeFile: fs.writeFile,
+    stat: fs.stat,
+    readFile: fs.readFile,
     relative: path.relative,
     dirname: path.dirname,
 };
@@ -83,7 +64,7 @@ export function runWebpack(
     instance.compilers.forEach((compiler) => (compiler.outputFileSystem = filesystem));
     instance.run((err, stats): void => {
         try {
-            // webpack does not hape typings for MultiStats,
+            // webpack does not have typings for MultiStats,
             // and typings for MultiCompiler.run()'s handler are incorrect
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
             const st: webpack.Stats[] = (stats as any).stats;
