@@ -2,7 +2,7 @@ import crypto from 'crypto';
 import type webpack from 'webpack';
 import HtmlWebpackPlugin from 'html-webpack-plugin';
 import cheerio from 'cheerio';
-import serialize from 'dom-serializer';
+import serialize, { DomSerializerOptions } from 'dom-serializer';
 
 export type CspHash = 'sha256' | 'sha384' | 'sha512';
 
@@ -114,9 +114,16 @@ export class HwpCspPlugin {
             meta.attr('content', newPolicy);
             $('head').prepend(meta);
 
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            const isXHTML = !!(plugin as any).options?.xhtml;
-            const options = isXHTML ? { selfClosingTags: true, emptyAttrs: true } : {};
+            const isXHTML = !!plugin.options?.xhtml;
+            const options: DomSerializerOptions = {
+                encodeEntities: false,
+            };
+
+            if (isXHTML) {
+                options.selfClosingTags = true;
+                options.emptyAttrs = true;
+            }
+
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
             return serialize(($ as any)._root.children, options);
         }
