@@ -1,5 +1,5 @@
 import path from 'path';
-import webpack, { WebpackPluginFunction, WebpackPluginInstance } from 'webpack';
+import webpack, { type Compiler, type WebpackPluginFunction, type WebpackPluginInstance } from 'webpack';
 import HtmlWebpackPlugin from 'html-webpack-plugin';
 import { fs, vol } from 'memfs';
 
@@ -35,7 +35,7 @@ const filesystem = {
     readFile: fs.readFile,
     relative: path.relative,
     dirname: path.dirname,
-};
+} as Compiler['outputFileSystem'];
 
 function getOutput(): Record<string, string> {
     const result: Record<string, string> = {};
