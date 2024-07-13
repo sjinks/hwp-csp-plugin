@@ -42,11 +42,11 @@ export class HwpCspPlugin {
                 script:
                     typeof options?.hashEnabled === 'boolean'
                         ? options.hashEnabled
-                        : options?.hashEnabled?.script ?? true,
+                        : (options?.hashEnabled?.script ?? true),
                 style:
                     typeof options?.hashEnabled === 'boolean'
                         ? options.hashEnabled
-                        : options?.hashEnabled?.style ?? true,
+                        : (options?.hashEnabled?.style ?? true),
             },
         };
 
