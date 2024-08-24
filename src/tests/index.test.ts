@@ -1,4 +1,4 @@
-import cheerio from 'cheerio';
+import { load } from 'cheerio';
 import { HwpCspPlugin } from '../index';
 import { getHWP, getWebpackConfig, runWebpack } from './utils';
 
@@ -59,7 +59,7 @@ describe('HwpCspPlugin', (): void => {
                 ]),
                 (html: Record<string, string>): void => {
                     const content = html['index.html'];
-                    const $ = cheerio.load(content, { decodeEntities: false });
+                    const $ = load(content);
                     const scripts = $('script:not([src])');
                     const styles = $('style');
 
@@ -79,7 +79,7 @@ describe('HwpCspPlugin', (): void => {
             getWebpackConfig([getHWP('many-csps.html', false), new HwpCspPlugin({ hashEnabled: false })]),
             (html: Record<string, string>): void => {
                 const content = html['index.html'];
-                const $ = cheerio.load(content, { decodeEntities: false });
+                const $ = load(content);
                 const metas = $('meta');
                 expect(metas.length).toBe(3);
 
@@ -90,9 +90,9 @@ describe('HwpCspPlugin', (): void => {
                 };
 
                 metas.each((i, el): void => {
-                    const attr = (el as cheerio.TagElement).attribs['http-equiv'];
+                    const attr = el.attribs['http-equiv'];
                     const expected = map[attr];
-                    expect((el as cheerio.TagElement).attribs['content']).toEqual(expected);
+                    expect(el.attribs['content']).toEqual(expected);
                 });
             },
             done,
@@ -113,7 +113,7 @@ describe('HwpCspPlugin', (): void => {
             ]),
             (html: Record<string, string>): void => {
                 const content = html['index.html'];
-                const $ = cheerio.load(content, { decodeEntities: false });
+                const $ = load(content);
                 const metas = $('meta');
                 expect(metas.length).toBe(1);
                 expect(metas.attr('http-equiv')).toBe('Content-Security-Policy');
@@ -131,7 +131,7 @@ describe('HwpCspPlugin', (): void => {
             ]),
             (html: Record<string, string>): void => {
                 const content = html['index.html'];
-                const $ = cheerio.load(content, { decodeEntities: false });
+                const $ = load(content);
                 const metas = $('meta');
                 expect(metas.length).toBe(3);
             },
@@ -151,7 +151,7 @@ describe('HwpCspPlugin', (): void => {
             ]),
             (html: Record<string, string>): void => {
                 const content = html['index.html'];
-                const $ = cheerio.load(content, { decodeEntities: false });
+                const $ = load(content);
                 const expected = `script-src-elem 'self' 'sha384-KYa/C8JinUfJfMkYsCZONXok/iV51fg5yPuUdMoF6xEZRVN/+Nt1VMfcTcnknqaa'; style-src-elem 'self' 'sha384-4PilAlQa7y4OZ9VElQ2NrsdUmqMF/1acM1oNUdMh+JEyU5OE6fFgbZSFGFZbwe6x'; script-src 'sha384-KYa/C8JinUfJfMkYsCZONXok/iV51fg5yPuUdMoF6xEZRVN/+Nt1VMfcTcnknqaa'; style-src 'sha384-4PilAlQa7y4OZ9VElQ2NrsdUmqMF/1acM1oNUdMh+JEyU5OE6fFgbZSFGFZbwe6x'`;
                 expect($('meta[http-equiv="Content-Security-Policy"]').attr('content')).toEqual(expected);
             },
@@ -170,7 +170,7 @@ describe('HwpCspPlugin', (): void => {
             ]),
             (html: Record<string, string>): void => {
                 const content = html['index.html'];
-                const $ = cheerio.load(content, { decodeEntities: false });
+                const $ = load(content);
                 const expected = `block-all-mixed-content; default-src 'self'`;
                 expect($('meta[http-equiv="Content-Security-Policy"]').attr('content')).toEqual(expected);
             },
@@ -189,9 +189,9 @@ describe('HwpCspPlugin', (): void => {
             ]),
             (html: Record<string, string>): void => {
                 const content = html['index.html'];
-                const matches = content.match(/(<meta[^>]+>)/);
+                const matches = /(<meta[^>]+>)/.exec(content);
                 expect(matches).not.toBeNull();
-                expect((matches as RegExpMatchArray)[1].match(/\/>$/) !== null).toBe(xhtml);
+                expect((matches as RegExpMatchArray)[1].endsWith('/>')).toBe(xhtml);
             },
             done,
         );

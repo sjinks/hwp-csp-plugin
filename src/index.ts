@@ -1,7 +1,7 @@
-import crypto from 'crypto';
-import type webpack from 'webpack';
+import crypto from 'node:crypto';
+import type { Compiler } from 'webpack';
 import HtmlWebpackPlugin from 'html-webpack-plugin';
-import cheerio from 'cheerio';
+import { type CheerioAPI, load } from 'cheerio';
 import serialize, { DomSerializerOptions } from 'dom-serializer';
 
 export type CspHash = 'sha256' | 'sha384' | 'sha512';
@@ -36,7 +36,7 @@ export class HwpCspPlugin {
         this._options = {
             enabled: options?.enabled ?? true,
             policy: HwpCspPlugin._normalizePolicy(options?.policy ?? {}),
-            hashFunc: options?.hashFunc || 'sha384',
+            hashFunc: options?.hashFunc ?? 'sha384',
             addIntegrity: !!options?.addIntegrity,
             hashEnabled: {
                 script:
@@ -59,7 +59,7 @@ export class HwpCspPlugin {
         }
     }
 
-    public apply(compiler: webpack.Compiler): void {
+    public apply(compiler: Compiler): void {
         if (this._options.enabled) {
             compiler.hooks.compilation.tap(PLUGIN, (compilation): void => {
                 const hooks = HtmlWebpackPlugin.getHooks(compilation);
@@ -72,7 +72,7 @@ export class HwpCspPlugin {
     }
 
     private _processHTML(html: string, plugin: HtmlWebpackPlugin): string {
-        const $ = cheerio.load(html);
+        const $ = load(html);
         let scriptHashes: string | undefined;
         let styleHashes: string | undefined;
 
@@ -104,10 +104,7 @@ export class HwpCspPlugin {
         const newPolicy = HwpCspPlugin._buildPolicy(policy);
         if (newPolicy) {
             $('meta[http-equiv]')
-                .filter(
-                    (i, el): boolean =>
-                        (el as cheerio.TagElement).attribs['http-equiv'].toLowerCase() === 'content-security-policy',
-                )
+                .filter((i, el): boolean => el.attribs['http-equiv'].toLowerCase() === 'content-security-policy')
                 .remove();
 
             const meta = $('<meta http-equiv="Content-Security-Policy"/>');
@@ -131,10 +128,10 @@ export class HwpCspPlugin {
         return html;
     }
 
-    private _getHashes(elements: cheerio.Cheerio, $: cheerio.Root): string[] {
+    private _getHashes(elements: ReturnType<ReturnType<typeof load>>, $: CheerioAPI): string[] {
         const { addIntegrity, hashFunc } = this._options;
-        return elements.get().map((e: cheerio.Element): string => {
-            const s = $(e).html() || '';
+        return elements.get().map((e): string => {
+            const s = $(e).html() ?? '';
             const hash = `${hashFunc}-${HwpCspPlugin._cspHash(s, hashFunc)}`;
             if (addIntegrity && !$(e).attr('integrity')) {
                 $(e).attr('integrity', hash);
