@@ -26,15 +26,15 @@ export function getWebpackConfig(plugins: (WebpackPluginFunction | WebpackPlugin
 }
 
 const filesystem = {
-    join: path.join,
-    mkdir: fs.mkdir,
-    rmdir: fs.rmdir,
-    unlink: fs.unlink,
-    writeFile: fs.writeFile,
-    stat: fs.stat,
-    readFile: fs.readFile,
-    relative: path.relative,
-    dirname: path.dirname,
+    join: path.join.bind(path),
+    mkdir: fs.mkdir.bind(fs),
+    rmdir: fs.rmdir.bind(fs),
+    unlink: fs.unlink.bind(fs),
+    writeFile: fs.writeFile.bind(fs),
+    stat: fs.stat.bind(fs),
+    readFile: fs.readFile.bind(fs),
+    relative: path.relative.bind(path),
+    dirname: path.dirname.bind(path),
 } as Compiler['outputFileSystem'];
 
 function getOutput(): Record<string, string> {
@@ -63,10 +63,7 @@ export function runWebpack(
     instance.compilers.forEach((compiler) => (compiler.outputFileSystem = filesystem));
     instance.run((err, stats): void => {
         try {
-            // webpack does not have typings for MultiStats,
-            // and typings for MultiCompiler.run()'s handler are incorrect
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            const st: webpack.Stats[] = (stats as any).stats;
+            const st: webpack.Stats[] = stats?.stats ?? [];
             expect(err).toBeFalsy();
             st.forEach((entry) => {
                 if (entry.compilation.warnings.length) {

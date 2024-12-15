@@ -3,7 +3,7 @@ import { HwpCspPlugin } from '../index';
 import { getHWP, getWebpackConfig, runWebpack } from './utils';
 
 class HwpCspPluginTest extends HwpCspPlugin {
-    public options() {
+    public options(): (typeof HwpCspPluginTest.prototype)['_options'] {
         return this._options;
     }
 }
@@ -50,7 +50,7 @@ describe('HwpCspPlugin', (): void => {
             style: boolean,
             hashScript: string | undefined,
             hashStyle: string | undefined,
-            done,
+            done: jest.DoneCallback,
         ): void => {
             runWebpack(
                 getWebpackConfig([
@@ -92,7 +92,7 @@ describe('HwpCspPlugin', (): void => {
                 metas.each((i, el): void => {
                     const attr = el.attribs['http-equiv'];
                     const expected = map[attr];
-                    expect(el.attribs['content']).toEqual(expected);
+                    expect(el.attribs.content).toEqual(expected);
                 });
             },
             done,
@@ -178,8 +178,7 @@ describe('HwpCspPlugin', (): void => {
         );
     });
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    it.each<any>([[true], [false]])('properly handles XHTML mode (%s)', (xhtml, done): void => {
+    it.each<boolean>([true, false])('properly handles XHTML mode (%s)', (xhtml, done): void => {
         runWebpack(
             getWebpackConfig([
                 getHWP('script-style.html', xhtml),
@@ -189,7 +188,7 @@ describe('HwpCspPlugin', (): void => {
             ]),
             (html: Record<string, string>): void => {
                 const content = html['index.html'];
-                const matches = /(<meta[^>]+>)/.exec(content);
+                const matches = /(<meta[^>]+>)/u.exec(content);
                 expect(matches).not.toBeNull();
                 expect((matches as RegExpMatchArray)[1].endsWith('/>')).toBe(xhtml);
             },

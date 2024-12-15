@@ -63,9 +63,9 @@ export class HwpCspPlugin {
         if (this._options.enabled) {
             compiler.hooks.compilation.tap(PLUGIN, (compilation): void => {
                 const hooks = HtmlWebpackPlugin.getHooks(compilation);
-                hooks.beforeEmit.tapAsync(PLUGIN, (data, cb): unknown => {
+                hooks.beforeEmit.tapAsync(PLUGIN, (data, cb): void => {
                     data.html = this._processHTML(data.html, data.plugin);
-                    return cb(null, data);
+                    cb(null, data);
                 });
             });
         }
@@ -88,16 +88,16 @@ export class HwpCspPlugin {
 
         const policy = { ...this._options.policy };
         if (scriptHashes) {
-            policy['script-src'] = (policy['script-src'] || '') + ' ' + scriptHashes;
+            policy['script-src'] = `${policy['script-src'] || ''} ${scriptHashes}`;
             if (policy['script-src-elem']) {
-                policy['script-src-elem'] += ' ' + scriptHashes;
+                policy['script-src-elem'] += ` ${scriptHashes}`;
             }
         }
 
         if (styleHashes) {
-            policy['style-src'] = (policy['style-src'] || '') + ' ' + styleHashes;
+            policy['style-src'] = `${policy['style-src'] || ''} ${styleHashes}`;
             if (policy['style-src-elem']) {
-                policy['style-src-elem'] += ' ' + styleHashes;
+                policy['style-src-elem'] += ` ${styleHashes}`;
             }
         }
 
@@ -121,8 +121,7 @@ export class HwpCspPlugin {
                 options.emptyAttrs = true;
             }
 
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            return serialize(($ as any)._root.children, options);
+            return serialize($._root.children, options);
         }
 
         return html;
