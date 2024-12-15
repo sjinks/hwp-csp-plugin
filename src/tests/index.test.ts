@@ -1,3 +1,5 @@
+import { equal, notEqual } from 'node:assert/strict';
+import { describe, it } from 'node:test';
 import { load } from 'cheerio';
 import { HwpCspPlugin } from '../index';
 import { getHWP, getWebpackConfig, runWebpack } from './utils';
@@ -8,8 +10,8 @@ class HwpCspPluginTest extends HwpCspPlugin {
     }
 }
 
-describe('HwpCspPlugin', (): void => {
-    it('should not alter a file when disabled', (done): void => {
+void describe('HwpCspPlugin', (): void => {
+    void it('should not alter a file when disabled', (_, done): void => {
         runWebpack(
             [
                 getWebpackConfig([getHWP('script-style.html', false, 'index-1.html')]),
@@ -18,40 +20,30 @@ describe('HwpCspPlugin', (): void => {
                     new HwpCspPlugin({ enabled: false }),
                 ]),
             ],
-            (html: Record<string, string>): void => {
-                expect(html['index-1.html']).toBe(html['index-2.html']);
-            },
+            (html: Record<string, string>) => equal(html['index-1.html'], html['index-2.html']),
             done,
         );
     });
 
-    // Use `any` until Jest fixes typings for `each()` to add `done` callback
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    it.each<any>([
-        [false, false, false, undefined, undefined],
-        [false, false, true, undefined, undefined],
-        [false, true, false, undefined, undefined],
-        [false, true, true, undefined, undefined],
-        [true, false, false, undefined, undefined],
-        [true, false, true, undefined, 'sha384-4PilAlQa7y4OZ9VElQ2NrsdUmqMF/1acM1oNUdMh+JEyU5OE6fFgbZSFGFZbwe6x'],
-        [true, true, false, 'sha384-KYa/C8JinUfJfMkYsCZONXok/iV51fg5yPuUdMoF6xEZRVN/+Nt1VMfcTcnknqaa', undefined],
+    (
         [
-            true,
-            true,
-            true,
-            'sha384-KYa/C8JinUfJfMkYsCZONXok/iV51fg5yPuUdMoF6xEZRVN/+Nt1VMfcTcnknqaa',
-            'sha384-4PilAlQa7y4OZ9VElQ2NrsdUmqMF/1acM1oNUdMh+JEyU5OE6fFgbZSFGFZbwe6x',
-        ],
-    ])(
-        'should add integrity attribute to inline styles and scripts when asked to (%p %p %p)',
-        (
-            addIntegrity: boolean,
-            script: boolean,
-            style: boolean,
-            hashScript: string | undefined,
-            hashStyle: string | undefined,
-            done: jest.DoneCallback,
-        ): void => {
+            [false, false, false, undefined, undefined],
+            [false, false, true, undefined, undefined],
+            [false, true, false, undefined, undefined],
+            [false, true, true, undefined, undefined],
+            [true, false, false, undefined, undefined],
+            [true, false, true, undefined, 'sha384-4PilAlQa7y4OZ9VElQ2NrsdUmqMF/1acM1oNUdMh+JEyU5OE6fFgbZSFGFZbwe6x'],
+            [true, true, false, 'sha384-KYa/C8JinUfJfMkYsCZONXok/iV51fg5yPuUdMoF6xEZRVN/+Nt1VMfcTcnknqaa', undefined],
+            [
+                true,
+                true,
+                true,
+                'sha384-KYa/C8JinUfJfMkYsCZONXok/iV51fg5yPuUdMoF6xEZRVN/+Nt1VMfcTcnknqaa',
+                'sha384-4PilAlQa7y4OZ9VElQ2NrsdUmqMF/1acM1oNUdMh+JEyU5OE6fFgbZSFGFZbwe6x',
+            ],
+        ] as const
+    ).forEach(([addIntegrity, script, style, hashScript, hashStyle]) => {
+        void it(`should add integrity attribute to inline styles and scripts when asked to (${addIntegrity} ${script} ${style})`, (_, done): void => {
             runWebpack(
                 getWebpackConfig([
                     getHWP('script-style.html', false),
@@ -63,25 +55,24 @@ describe('HwpCspPlugin', (): void => {
                     const scripts = $('script:not([src])');
                     const styles = $('style');
 
-                    expect(scripts.length).toBe(1);
-                    expect(styles.length).toBe(1);
-
-                    expect(scripts.attr('integrity')).toEqual(hashScript);
-                    expect(styles.attr('integrity')).toEqual(hashStyle);
+                    equal(scripts.length, 1);
+                    equal(styles.length, 1);
+                    equal(scripts.attr('integrity'), hashScript);
+                    equal(styles.attr('integrity'), hashStyle);
                 },
                 done,
             );
-        },
-    );
+        });
+    });
 
-    it('does not remove existing policies if the policy is empty', (done): void => {
+    void it('does not remove existing policies if the policy is empty', (_, done): void => {
         runWebpack(
             getWebpackConfig([getHWP('many-csps.html', false), new HwpCspPlugin({ hashEnabled: false })]),
             (html: Record<string, string>): void => {
                 const content = html['index.html'];
                 const $ = load(content);
                 const metas = $('meta');
-                expect(metas.length).toBe(3);
+                equal(metas.length, 3);
 
                 const map: Record<string, string | undefined> = {
                     'Content-Security-Policy': "default-src 'self'",
@@ -92,14 +83,14 @@ describe('HwpCspPlugin', (): void => {
                 metas.each((i, el): void => {
                     const attr = el.attribs['http-equiv'];
                     const expected = map[attr];
-                    expect(el.attribs.content).toEqual(expected);
+                    equal(el.attribs.content, expected);
                 });
             },
             done,
         );
     });
 
-    it('replaces all existing policies with the new one', (done): void => {
+    void it('replaces all existing policies with the new one', (_, done): void => {
         runWebpack(
             getWebpackConfig([
                 getHWP('many-csps.html', false),
@@ -115,15 +106,15 @@ describe('HwpCspPlugin', (): void => {
                 const content = html['index.html'];
                 const $ = load(content);
                 const metas = $('meta');
-                expect(metas.length).toBe(1);
-                expect(metas.attr('http-equiv')).toBe('Content-Security-Policy');
-                expect(metas.attr('content')).toBe(`default-src 'none'; script-src 'self'`);
+                equal(metas.length, 1);
+                equal(metas.attr('http-equiv'), 'Content-Security-Policy');
+                equal(metas.attr('content'), `default-src 'none'; script-src 'self'`);
             },
             done,
         );
     });
 
-    it('leaves file as is if no policy specified and no scripts / styles to hash', (done): void => {
+    void it('leaves file as is if no policy specified and no scripts / styles to hash', (_, done): void => {
         runWebpack(
             getWebpackConfig([
                 getHWP('csps-no-scripts-styles.html', false),
@@ -133,13 +124,13 @@ describe('HwpCspPlugin', (): void => {
                 const content = html['index.html'];
                 const $ = load(content);
                 const metas = $('meta');
-                expect(metas.length).toBe(3);
+                equal(metas.length, 3);
             },
             done,
         );
     });
 
-    it('adds hashes to script-src-elem / style-src-elem if they present', (done): void => {
+    void it('adds hashes to script-src-elem / style-src-elem if they present', (_, done): void => {
         runWebpack(
             getWebpackConfig([
                 getHWP('script-style.html', false),
@@ -153,13 +144,13 @@ describe('HwpCspPlugin', (): void => {
                 const content = html['index.html'];
                 const $ = load(content);
                 const expected = `script-src-elem 'self' 'sha384-KYa/C8JinUfJfMkYsCZONXok/iV51fg5yPuUdMoF6xEZRVN/+Nt1VMfcTcnknqaa'; style-src-elem 'self' 'sha384-4PilAlQa7y4OZ9VElQ2NrsdUmqMF/1acM1oNUdMh+JEyU5OE6fFgbZSFGFZbwe6x'; script-src 'sha384-KYa/C8JinUfJfMkYsCZONXok/iV51fg5yPuUdMoF6xEZRVN/+Nt1VMfcTcnknqaa'; style-src 'sha384-4PilAlQa7y4OZ9VElQ2NrsdUmqMF/1acM1oNUdMh+JEyU5OE6fFgbZSFGFZbwe6x'`;
-                expect($('meta[http-equiv="Content-Security-Policy"]').attr('content')).toEqual(expected);
+                equal($('meta[http-equiv="Content-Security-Policy"]').attr('content'), expected);
             },
             done,
         );
     });
 
-    it('handles valueless policy attributes properly', (done) => {
+    void it('handles valueless policy attributes properly', (_, done) => {
         runWebpack(
             getWebpackConfig([
                 getHWP('script-style.html', false),
@@ -172,34 +163,36 @@ describe('HwpCspPlugin', (): void => {
                 const content = html['index.html'];
                 const $ = load(content);
                 const expected = `block-all-mixed-content; default-src 'self'`;
-                expect($('meta[http-equiv="Content-Security-Policy"]').attr('content')).toEqual(expected);
+                equal($('meta[http-equiv="Content-Security-Policy"]').attr('content'), expected);
             },
             done,
         );
     });
 
-    it.each<boolean>([true, false])('properly handles XHTML mode (%s)', (xhtml, done): void => {
-        runWebpack(
-            getWebpackConfig([
-                getHWP('script-style.html', xhtml),
-                new HwpCspPlugin({
-                    policy: { 'default-src': "'self'" },
-                }),
-            ]),
-            (html: Record<string, string>): void => {
-                const content = html['index.html'];
-                const matches = /(<meta[^>]+>)/u.exec(content);
-                expect(matches).not.toBeNull();
-                expect((matches as RegExpMatchArray)[1].endsWith('/>')).toBe(xhtml);
-            },
-            done,
-        );
+    ([true, false] as const).forEach((xhtml) => {
+        void it(`properly handles XHTML mode (${xhtml})`, (_, done): void => {
+            runWebpack(
+                getWebpackConfig([
+                    getHWP('script-style.html', xhtml),
+                    new HwpCspPlugin({
+                        policy: { 'default-src': "'self'" },
+                    }),
+                ]),
+                (html: Record<string, string>): void => {
+                    const content = html['index.html'];
+                    const matches = /(<meta[^>]+>)/u.exec(content);
+                    notEqual(matches, null);
+                    equal(matches![1].endsWith('/>'), xhtml);
+                },
+                done,
+            );
+        });
     });
 
-    describe('option parser', (): void => {
-        it('should enable the plugin by default', () => {
+    void describe('option parser', (): void => {
+        void it('should enable the plugin by default', () => {
             const plugin = new HwpCspPluginTest();
-            expect(plugin.options().enabled).toBe(true);
+            equal(plugin.options().enabled, true);
         });
     });
 });

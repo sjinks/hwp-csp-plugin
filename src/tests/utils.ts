@@ -1,4 +1,5 @@
-import path from 'path';
+import { equal } from 'node:assert/strict';
+import path from 'node:path';
 import webpack, { type Compiler, type WebpackPluginFunction, type WebpackPluginInstance } from 'webpack';
 import HtmlWebpackPlugin from 'html-webpack-plugin';
 import { fs, vol } from 'memfs';
@@ -55,7 +56,7 @@ type Callback = (html: Record<string, string>) => void;
 export function runWebpack(
     config: webpack.Configuration | webpack.Configuration[],
     callback: Callback,
-    done: jest.DoneCallback,
+    done: (result?: unknown) => void,
 ): void {
     const cfg = Array.isArray(config) ? config : [config];
     vol.reset();
@@ -64,7 +65,7 @@ export function runWebpack(
     instance.run((err, stats): void => {
         try {
             const st: webpack.Stats[] = stats?.stats ?? [];
-            expect(err).toBeFalsy();
+            equal(!!err, false);
             st.forEach((entry) => {
                 if (entry.compilation.warnings.length) {
                     console.warn(entry.compilation.warnings);
@@ -74,8 +75,8 @@ export function runWebpack(
                     console.error(entry.compilation.errors);
                 }
 
-                expect(entry.compilation.errors).toHaveLength(0);
-                expect(entry.compilation.warnings).toHaveLength(0);
+                equal(entry.compilation.errors.length, 0);
+                equal(entry.compilation.warnings.length, 0);
             });
 
             const html = getOutput();
