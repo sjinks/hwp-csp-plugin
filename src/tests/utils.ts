@@ -1,4 +1,4 @@
-import { equal } from 'node:assert/strict';
+import { equal, ok } from 'node:assert/strict';
 import path from 'node:path';
 import webpack, { type Compiler, type WebpackPluginFunction, type WebpackPluginInstance } from 'webpack';
 import HtmlWebpackPlugin from 'html-webpack-plugin';
@@ -61,6 +61,7 @@ export function runWebpack(
     const cfg = Array.isArray(config) ? config : [config];
     vol.reset();
     const instance = webpack(cfg);
+    ok(instance);
     instance.compilers.forEach((compiler) => (compiler.outputFileSystem = filesystem));
     instance.run((err, stats): void => {
         try {
