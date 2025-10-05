@@ -2,7 +2,7 @@ import { equal, notEqual } from 'node:assert/strict';
 import { describe, it } from 'node:test';
 import { load } from 'cheerio';
 import { HwpCspPlugin } from '../index';
-import { getHWP, getWebpackConfig, runWebpack } from './utils';
+import { getHWP, getWebpackConfig, getWebpackMultiConfig, runWebpack } from './utils';
 
 class HwpCspPluginTest extends HwpCspPlugin {
     public options(): (typeof HwpCspPluginTest.prototype)['_options'] {
@@ -13,13 +13,13 @@ class HwpCspPluginTest extends HwpCspPlugin {
 void describe('HwpCspPlugin', (): void => {
     void it('should not alter a file when disabled', (_, done): void => {
         runWebpack(
-            [
+            getWebpackMultiConfig([
                 getWebpackConfig([getHWP('script-style.html', false, 'index-1.html')]),
                 getWebpackConfig([
                     getHWP('script-style.html', false, 'index-2.html'),
                     new HwpCspPlugin({ enabled: false }),
                 ]),
-            ],
+            ]),
             (html: Record<string, string>) => equal(html['index-1.html'], html['index-2.html']),
             done,
         );
