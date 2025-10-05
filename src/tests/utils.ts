@@ -1,6 +1,13 @@
 import { equal, ok } from 'node:assert/strict';
 import path from 'node:path';
-import webpack, { type Compiler, type WebpackPluginFunction, type WebpackPluginInstance } from 'webpack';
+import webpack, {
+    type Compiler,
+    type Configuration,
+    type MultiConfiguration,
+    WebpackOptionsDefaulter,
+    type WebpackPluginFunction,
+    type WebpackPluginInstance,
+} from 'webpack';
 import HtmlWebpackPlugin from 'html-webpack-plugin';
 import { fs, vol } from 'memfs';
 
@@ -13,7 +20,7 @@ export function getHWP(file: string, xhtml: boolean, output = 'index.html'): Htm
     });
 }
 
-export function getWebpackConfig(plugins: (WebpackPluginFunction | WebpackPluginInstance)[]): webpack.Configuration {
+export function getWebpackConfig(plugins: (WebpackPluginFunction | WebpackPluginInstance)[]): Configuration {
     return {
         mode: 'development',
         entry: {
@@ -23,7 +30,13 @@ export function getWebpackConfig(plugins: (WebpackPluginFunction | WebpackPlugin
             path: '/build',
         },
         plugins,
+        cache: false,
     };
+}
+
+export function getWebpackMultiConfig(configs: Configuration[]): MultiConfiguration {
+    const defaulter = new WebpackOptionsDefaulter();
+    return configs.map((config) => defaulter.process(config));
 }
 
 const filesystem = {
@@ -54,7 +67,7 @@ function getOutput(): Record<string, string> {
 type Callback = (html: Record<string, string>) => void;
 
 export function runWebpack(
-    config: webpack.Configuration | webpack.Configuration[],
+    config: Configuration | MultiConfiguration,
     callback: Callback,
     done: (result?: unknown) => void,
 ): void {
