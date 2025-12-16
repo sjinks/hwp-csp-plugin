@@ -4,7 +4,6 @@ import webpack, {
     type Compiler,
     type Configuration,
     type MultiConfiguration,
-    WebpackOptionsDefaulter,
     type WebpackPluginFunction,
     type WebpackPluginInstance,
 } from 'webpack';
@@ -32,11 +31,6 @@ export function getWebpackConfig(plugins: (WebpackPluginFunction | WebpackPlugin
         plugins,
         cache: false,
     };
-}
-
-export function getWebpackMultiConfig(configs: Configuration[]): MultiConfiguration {
-    const defaulter = new WebpackOptionsDefaulter();
-    return configs.map((config) => defaulter.process(config));
 }
 
 const filesystem = {
