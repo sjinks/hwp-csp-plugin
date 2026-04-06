@@ -42,7 +42,7 @@
     "memfs": "^4.51.1",
     "node-reporter-gha": "^2.0.5",
     "ts-node": "^10.9.2",
-    "typescript": "^5.9.3",
+    "typescript": "^6.0.0",
     "webpack": "^5.104.0"
   },
   "dependencies": {
