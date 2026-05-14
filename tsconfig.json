@@ -3,6 +3,7 @@
         "target": "ES2022",
         "module": "NodeNext",
         "moduleResolution": "nodenext",
+        "rootDir": "./src",
         "outDir": "./dist",
         "sourceMap": true,
         "declaration": true,
@@ -12,6 +13,5 @@
         "noFallthroughCasesInSwitch": true,
         "esModuleInterop": true
     },
-    "include": ["src/**.ts", "src/**/*.ts"],
     "compileOnSave": true
 }
